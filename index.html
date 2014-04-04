@@ -9,8 +9,7 @@
   <meta name="author" content="Roberto Rivas">
 
   
-  <meta name="description" content="After trying to get a blog up so many times in the past, I finally just forced myself to do it.
-Thankfully there are loads of options that will make &hellip;">
+  <meta name="description" content="I built a raid 5 array some time ago, but never really tested it. I wanted to figure out if I knew what to do in case a drive failed on me before I &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +71,65 @@ Thankfully there are loads of options that will make &hellip;">
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/04/03/replace-drive-in-a-raid-array/">Replace a Drive in a Raid Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-03T21:12:21-07:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I built a raid 5 array some time ago, but never really tested it.  I wanted to figure out if I knew what to do in case a drive failed on me before I started loading them up with important data.  This is what I went through to remove a drive, partition a new one and add it to the array.</p>
+
+<h5>Removing a Drive</h5>
+
+<p>In order to remove a drive, it must be makred as faulty.  It may be marked faulty through failure or manually.</p>
+
+<p>To manually mark a drive as faulty you can do it by using the -f/&mdash;fail flag, lisk so: <code>sudo mdadm /dev/md0 -f /dev/sdd1</code> where <code>/dev/md0</code> is your array and <code>/dev/sdd1</code> is the drive to be marked faulty.</p>
+
+<p>You can see the drive has been marked as faulty in the array details.</p>
+
+<pre><code>$ sudo mdadm --detail /dev/md0
+
+ Number   Major   Minor   RaidDevice State
+   0       8       97        0      active sync   /dev/sdg1
+   1       0        0        1      removed
+   3       8       33        2      active sync   /dev/sdc1
+
+   1       8       17        -      faulty spare   /dev/sdb1
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/04/03/replace-drive-in-a-raid-array/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/03/31/hello-world/">Hello World!</a></h1>
     
     
@@ -122,6 +180,10 @@ Reminds me of college days, escept that, hopefully I find these notes more usefu
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/03/replace-drive-in-a-raid-array/">Replace a Drive in a Raid Array</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/03/31/hello-world/">Hello World!</a>

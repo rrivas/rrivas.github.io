@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Because why not]]></title>
-  <link href="http://rrivas.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Raid5 | Because why not]]></title>
+  <link href="http://rrivas.github.io/blog/categories/raid5/atom.xml" rel="self"/>
   <link href="http://rrivas.github.io/"/>
   <updated>2014-04-04T16:39:07-07:00</updated>
   <id>http://rrivas.github.io/</id>
@@ -128,23 +128,6 @@ md0 : active raid5 sdf1[3] sde1[4] sdd1[0]
 <strong>blkid</strong> &ndash; Print block device attributes such as name, label and UUID<br/>
 <strong>fdisk -l</strong> &ndash; List partition tables<br/>
 <strong>lshw -C disk</strong> &ndash; list Hardware of Class disk</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hello World!]]></title>
-    <link href="http://rrivas.github.io/blog/2014/03/31/hello-world/"/>
-    <updated>2014-03-31T22:50:47-07:00</updated>
-    <id>http://rrivas.github.io/blog/2014/03/31/hello-world</id>
-    <content type="html"><![CDATA[<p>After trying to get a blog up so many times in the past, I finally just forced myself to do it.
-Thankfully there are loads of options that will make it easy for anyone to get up and going.</p>
-
-<p>My primary reason for starting this is to keep track of my technical thoughts and understandings.
-I read a wide variety of technical tutorials, blogs, books, etc., and learn a lot.
-Sadly, things get foggy after some time. So to combat that feeling, I&rsquo;m going to use this as notes to what I have learned.
-Reminds me of college days, escept that, hopefully I find these notes more useful.</p>
-
-<p>Let the games begin!</p>
 ]]></content>
   </entry>
   

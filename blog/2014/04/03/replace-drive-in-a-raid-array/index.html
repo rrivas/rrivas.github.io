@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Replace a Drive in a Raid Array - Because why not</title>
+  <meta name="author" content="Roberto Rivas">
+
+  
+  <meta name="description" content="I built a raid 5 array some time ago, but never really tested it. I wanted to figure out if I knew what to do in case a drive failed on me before I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://rrivas.github.io/blog/2014/04/03/replace-drive-in-a-raid-array">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Because why not" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Because why not</a></h1>
+  
+    <h2>Learning through breakage</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:rrivas.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Replace a Drive in a Raid Array</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-03T21:12:21-07:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I built a raid 5 array some time ago, but never really tested it.  I wanted to figure out if I knew what to do in case a drive failed on me before I started loading them up with important data.  This is what I went through to remove a drive, partition a new one and add it to the array.</p>
+
+<h5>Removing a Drive</h5>
+
+<p>In order to remove a drive, it must be makred as faulty.  It may be marked faulty through failure or manually.</p>
+
+<p>To manually mark a drive as faulty you can do it by using the -f/&mdash;fail flag, lisk so: <code>sudo mdadm /dev/md0 -f /dev/sdd1</code> where <code>/dev/md0</code> is your array and <code>/dev/sdd1</code> is the drive to be marked faulty.</p>
+
+<p>You can see the drive has been marked as faulty in the array details.</p>
+
+<pre><code>$ sudo mdadm --detail /dev/md0
+
+ Number   Major   Minor   RaidDevice State
+   0       8       97        0      active sync   /dev/sdg1
+   1       0        0        1      removed
+   3       8       33        2      active sync   /dev/sdc1
+
+   1       8       17        -      faulty spare   /dev/sdb1
+</code></pre>
+
+<!-- more -->
+
+
+<p>Now we&rsquo;re going to remove the faulty drive with the -r/&mdash;remove flag.</p>
+
+<pre><code>$ sudo mdadm /dev/md0 -r /dev/sdb1
+mdadm: hot removed /dev/sdb1 from /dev/md0
+</code></pre>
+
+<p>and running the details we find that it is no longer there.</p>
+
+<pre><code>$ sudo mdadm --detail /dev/md0
+
+Number   Major   Minor   RaidDevice State
+   0       8       97        0      active sync   /dev/sdg1
+   1       0        0        1      removed
+   3       8       33        2      active sync   /dev/sdc1
+</code></pre>
+
+<p><strong>Caution</strong> If you restart your machine at this time, you&rsquo;re going to encounter an array degredation warning on boot up.  Ubuntu is looking out for you and verifying that you wish to continue.</p>
+
+<h4>Partitioning a drive</h4>
+
+<p>Now we&rsquo;ll parition a drive to replace the one that failed.  You want these drives to be identical for best results.  The drives I&rsquo;m using are 3TB and I&rsquo;ll be using <strong>parted</strong> to get larger than 2TB hard drives partitioned with a GPT partition.  I&rsquo;m just reformating the drive I failed which is still located on <code>/dev/sdb</code>.</p>
+
+<p>Open the drive with <strong>parted</strong>, set the table, and create the partition</p>
+
+<pre><code>$ sudo parted /dev/sdb
+(parted) mklabel gpt
+(parted) mkpart somename  ext4 1MiB -1
+</code></pre>
+
+<p><em>I remember reading -1 was to get you the full size of the array.  Use with caution, YMMV.</em></p>
+
+<p>Now you can print the parition to see the changes</p>
+
+<pre><code>(parted) print
+Model: ATA ST3000DM001-1CH1 (scsi)
+Disk /dev/sdb: 3001GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+
+Number  Start   End     Size    File system  Name  Flags
+ 1      1049kB  3001GB  3001GB  ext4         1
+</code></pre>
+
+<p>If you don&rsquo;t remember what the beginning and end of the other hard drives were, you can use <code>sfdisk</code> to copy the partition table from one of your working array devices.</p>
+
+<pre><code>sudo sfdisk -d /dev/sdg | sfdisk /dev/sdb
+</code></pre>
+
+<h4>Adding a drive</h4>
+
+<p>Now that your drive is partitioned, we&rsquo;ll add the drive to the array.</p>
+
+<pre><code>$ sudo mdadm --manage /dev/md0 --add /dev/sdb1
+mdadm: added /dev/sdb1
+</code></pre>
+
+<p>We can check the status of the addition by running</p>
+
+<pre><code>$ cat /proc/mdstat
+Personalities : [linear] [multipath] [raid0] [raid1] [raid6] [raid5] [raid4] [raid10]
+md0 : active raid5 sdb1[4] sdg1[0] sdc1[3]
+      5860267008 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [U_U]
+      [&gt;....................]  recovery =  0.1% (4802048/2930133504) finish=403.5min speed=120816K/sec
+
+unused devices: &lt;none&gt;
+</code></pre>
+
+<p>Once the hard drives are sync&rsquo;d, <code>mdstat</code> should look like</p>
+
+<pre><code>$ cat /proc/mdstat
+Personalities : [linear] [multipath] [raid0] [raid1] [raid6] [raid5] [raid4] [raid10]
+md0 : active raid5 sdf1[3] sde1[4] sdd1[0]
+      5860267008 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/3] [UUU]
+
+      unused devices: &lt;none&gt;&lt;/none&gt;
+</code></pre>
+
+<h5>Conclusion</h5>
+
+<p>Now I know what I need to do if a drive were to truly fail on me.  I also learned that you can add more hard drives using the same procedure for adding a drive here. Hopefully I can find a drive that&rsquo;s identical to the ones I already have.</p>
+
+<p>Here are some links and commands that were really helpful in figuring out what to do.</p>
+
+<p><strong>Partitioning</strong> &ndash; <a href="http://www.sleeandtopher.com/how-to-partition-a-gpt-hard-drive-in-ubuntu/  ">http://www.sleeandtopher.com/how-to-partition-a-gpt-hard-drive-in-ubuntu/  </a>
+<strong>blkid</strong> &ndash; Print block device attributes such as name, label and UUID<br/>
+<strong>fdisk -l</strong> &ndash; List partition tables<br/>
+<strong>lshw -C disk</strong> &ndash; list Hardware of Class disk</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Roberto Rivas</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-03T21:12:21-07:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/raid/'>raid</a>, <a class='category' href='/blog/categories/raid5/'>raid5</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://rrivas.github.io/blog/2014/04/03/replace-drive-in-a-raid-array/" data-via="" data-counturl="http://rrivas.github.io/blog/2014/04/03/replace-drive-in-a-raid-array/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/31/hello-world/" title="Previous Post: Hello World!">&laquo; Hello World!</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/03/replace-drive-in-a-raid-array/">Replace a Drive in a Raid Array</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/31/hello-world/">Hello World!</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Roberto Rivas -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -87,7 +87,15 @@ We can check the status of the addition by running
           [>....................]  recovery =  0.1% (4802048/2930133504) finish=403.5min speed=120816K/sec
     
     unused devices: <none>
+
+Once the hard drives are sync'd, `mdstat` should look like
+
+    $ cat /proc/mdstat
+    Personalities : [linear] [multipath] [raid0] [raid1] [raid6] [raid5] [raid4] [raid10]
+    md0 : active raid5 sdf1[3] sde1[4] sdd1[0]
+          5860267008 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/3] [UUU]
     
+          unused devices: <none></none>
 
 #####Conclusion
 
